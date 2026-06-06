@@ -41,6 +41,7 @@ const PostJob = () => {
       
       const companyId = session?.user.id;
       // console.log(companyId)
+
   
 
   const handleChange = (field, value) => {
@@ -58,9 +59,12 @@ const PostJob = () => {
       status: 'Active',
       companyId: companyId
     };
-    await createJob(payload)
 
-    // console.log('Posting Job:', payload);
+    const {data:tokenData} = await authClient.token();
+
+    await createJob(payload, tokenData)
+
+    console.log('Posting Job:', payload, tokenData);
 
     router.push('/dashboard/recruiter/jobs');
   };

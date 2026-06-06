@@ -1,12 +1,9 @@
-// form theke data niye post method diye server e post korbo
-
-// database e joma hobe . seta ene manage jobs e dekhabo.
-
-export const createJob = async(payload) =>{
+export const createJob = async(payload, tokenData) =>{
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/jobs`, {
         method: "POST",
         headers: {
-            'content-type' : 'application/json'
+            'content-type' : 'application/json',
+            authorization: `bearer ${tokenData?.token}`
         },
         body: JSON.stringify(payload)
     })
@@ -14,8 +11,12 @@ export const createJob = async(payload) =>{
     return data;
 }
 
-export const getJobs = async(userId)=>{
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/jobs/${userId}`);
+export const getJobs = async(userId, tokenData)=>{
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/jobs/${userId}`, {
+        headers: {
+            authorization: `bearer ${tokenData?.token}`
+        }
+    });
     const jobs = await res.json();
     return jobs;
 

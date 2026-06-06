@@ -26,7 +26,9 @@ const ManageJobs = () => {
 
   useEffect(()=>{
     const handleJobsPromise = async()=>{
-        const jobsData = await getJobs(userId);
+      const {data:tokenData} = await authClient.token();
+      console.log(tokenData)
+        const jobsData = await getJobs(userId, tokenData);
         return setJobs(jobsData);
     }
     handleJobsPromise()
