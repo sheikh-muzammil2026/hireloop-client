@@ -4,7 +4,7 @@ import { IoIosNotificationsOutline } from 'react-icons/io';
 
 const SearchSection = () => {
     return (
-         <div className="flex items-center justify-between w-full">
+         <div className="flex items-center justify-between w-full mb-10">
 
   {/* LEFT SIDE */}
   <h1 className="text-lg font-medium text-white">
@@ -14,13 +14,14 @@ const SearchSection = () => {
   {/* RIGHT SIDE */}
   <div className="flex items-center gap-4">
 
-    <SearchField name="search">
+    <SearchField name="search" aria-label="Global search">
       <SearchField.Group>
         <SearchField.SearchIcon aria-label="Search icon" />
 
         <SearchField.Input
           className="w-[280px]"
           placeholder="Search..."
+          aria-label="Search"
         />
 
         <SearchField.ClearButton aria-label="Clear search input" />

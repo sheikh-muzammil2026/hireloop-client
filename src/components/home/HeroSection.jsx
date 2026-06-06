@@ -46,7 +46,7 @@ export default function HeroSection() {
           </p>
         </div>
 
-        {/* SEARCH BAR CONTAINER (গ্লাস-মরফিজম লুক) */}
+        {/* SEARCH BAR CONTAINER  */}
         <form 
           onSubmit={handleSearch}
           className="mx-auto mt-12 flex max-w-3xl flex-col gap-3 rounded-2xl border border-white/10 bg-[#12121A]/60 p-2 backdrop-blur-xl sm:flex-row sm:items-center sm:rounded-full"

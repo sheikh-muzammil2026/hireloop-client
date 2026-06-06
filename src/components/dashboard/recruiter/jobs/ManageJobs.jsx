@@ -6,9 +6,11 @@ import { getJobs } from '@/lib/actions';
 import { authClient } from '@/lib/auth-client';
 import { Eye } from '@gravity-ui/icons';
 import {Pencil} from '@gravity-ui/icons';
+import { toast } from 'react-toastify';
 
 const ManageJobs = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false)
 
   // demo plan limit
   const jobLimit = 10;
@@ -26,13 +28,21 @@ const ManageJobs = () => {
 
   useEffect(()=>{
     const handleJobsPromise = async()=>{
-      const {data:tokenData} = await authClient.token();
-      console.log(tokenData)
+      try {
+        setLoading(true)
+        const {data:tokenData} = await authClient.token();
         const jobsData = await getJobs(userId, tokenData);
+        setLoading(false)
         return setJobs(jobsData);
+        
+      } catch (error) {
+        toast.error(error.message)
+      }
     }
     handleJobsPromise()
+    
   } ,[])
+
 
   // const toggleStatus = (id) => {
   //   setJobs((prev) =>
@@ -70,7 +80,11 @@ const ManageJobs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#07070A] text-white px-4 py-8 flex justify-center">
+    <>
+    {
+      loading ? <p className='text-center'>loading...</p>
+      :
+      <div className="min-h-screen bg-[#07070A] text-white px-4 py-8 flex justify-center">
       <div className="w-full max-w-6xl space-y-6">
 
         {/* HEADER */}
@@ -192,6 +206,9 @@ const ManageJobs = () => {
 
       </div>
     </div>
+    }
+    </>
+   
   );
 };
 

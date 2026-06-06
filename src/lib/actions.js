@@ -21,3 +21,9 @@ export const getJobs = async(userId, tokenData)=>{
     return jobs;
 
 }
+
+export const browseJobs = async()=>{
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/jobs`);
+    const data = await res.json()
+    return data;
+}

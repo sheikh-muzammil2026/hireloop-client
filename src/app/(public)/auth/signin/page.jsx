@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@heroui/react";
-import { Eye, EyeSlash } from "@gravity-ui/icons";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
