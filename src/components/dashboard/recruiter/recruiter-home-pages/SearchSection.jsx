@@ -1,8 +1,24 @@
+'use client'
+// import { searchJobs } from '@/lib/actions';
 import { SearchField } from '@heroui/react';
-import React from 'react';
+import React, {  useState } from 'react';
 import { IoIosNotificationsOutline } from 'react-icons/io';
 
 const SearchSection = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  // const [loading, setLoading]        = useState(false)
+  // const [allJobs, setAllJobs]             =useState([]);
+
+  // useEffect(()=>{
+  //   const fetchJobs = async()=>{
+  //     setLoading(true)
+  //     const jobs = await searchJobs(searchTerm);
+  //     setAllJobs(jobs)
+  //     setLoading(false)
+  //   }
+  //   fetchJobs()
+  // } , [searchTerm])
+
     return (
          <div className="flex items-center justify-between w-full mb-10">
 
@@ -10,6 +26,7 @@ const SearchSection = () => {
   <h1 className="text-lg font-medium text-white">
     Welcome back, Alex Sterling
   </h1>
+  
 
   {/* RIGHT SIDE */}
   <div className="flex items-center gap-4">
@@ -22,11 +39,15 @@ const SearchSection = () => {
           className="w-[280px]"
           placeholder="Search..."
           aria-label="Search"
+          value={searchTerm}
+          onChange={(e)=> setSearchTerm(e.target.value)}
         />
 
         <SearchField.ClearButton aria-label="Clear search input" />
       </SearchField.Group>
     </SearchField>
+
+    {/* {loading ? "loading..." : <p>result: {allJobs.length} </p>} */}
 
             <button
         aria-label="Notifications"

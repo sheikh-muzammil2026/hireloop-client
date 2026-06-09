@@ -1,5 +1,6 @@
 'use client';
 
+import { createLogoUploadAction } from '@/lib/actions';
 import { useState } from 'react';
 
 export default function RegisterCompanyModal({ isOpen, onClose }) {
@@ -9,18 +10,40 @@ export default function RegisterCompanyModal({ isOpen, onClose }) {
     website: '',
     location: '',
     employees: '',
-    logo: null,
     description: '',
+    logo: null
   });
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleLogo = async(e) =>{
+    // image recieve
+    const file = e.target.files[0];
+      if(!file) return
+
+  //  empty formData object creating
+    const formData = new FormData();
+    formData.append('image', file);
+
+  // calling api to upload image
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMAGE_UPLOAD_API}`, {
+    method: "POST",
+    body: formData
+  })
+  const data = await res.json()
+  
+  const url = data?.data.url;
+  setForm((prev)=> ({...prev, logo: url}))
+    
+  }
+
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
-    console.log(form);
+    console.log(form, "from company register modal")
+  const handleSubmit = async() => {
+     await createLogoUploadAction(form)
     onClose();
   };
 
@@ -124,9 +147,8 @@ export default function RegisterCompanyModal({ isOpen, onClose }) {
               <input
                 type="file"
                 accept="image/png, image/jpeg"
-                onChange={(e) =>
-                  handleChange('logo', e.target.files?.[0])
-                }
+                // value={logoUrl}
+                onChange={handleLogo}
                 className="mt-2 w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-white/10 file:text-white hover:file:bg-white/20"
               />
 

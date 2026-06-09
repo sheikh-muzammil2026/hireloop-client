@@ -18,7 +18,7 @@ const ManageJobs = () => {
 
   const isLimitReached = activeJobsCount >= jobLimit;
 
-  const [jobs, setJobs] = useState();
+  const [jobs, setJobs] = useState([]);
 
    const { 
           data: session
@@ -27,21 +27,24 @@ const ManageJobs = () => {
     const userId = session?.user?.id;
 
   useEffect(()=>{
+    if (!userId) return;
     const handleJobsPromise = async()=>{
+      
       try {
         setLoading(true)
-        const {data:tokenData} = await authClient.token();
+         const {data:tokenData} = await authClient.token();
         const jobsData = await getJobs(userId, tokenData);
-        setLoading(false)
         return setJobs(jobsData);
         
       } catch (error) {
         toast.error(error.message)
+      }finally{
+        setLoading(false)
       }
     }
     handleJobsPromise()
     
-  } ,[])
+  } ,[userId])
 
 
   // const toggleStatus = (id) => {

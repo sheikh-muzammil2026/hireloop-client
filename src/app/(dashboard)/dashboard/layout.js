@@ -1,4 +1,3 @@
-import SearchSection from '@/components/dashboard/recruiter/recruiter-home-pages/SearchSection';
 import Sidebar from '@/components/dashboard/Sidebar';
 import React from 'react';
 
@@ -16,7 +15,7 @@ const dashboardLayout = ({children}) => {
         <div className="flex-1">
             <Sidebar/>
             <main className="ml-64 flex-1 min-h-screen bg-[#07070A] text-white p-6">
-                <SearchSection/>
+                
                 {children}
                 </main>
         </div>

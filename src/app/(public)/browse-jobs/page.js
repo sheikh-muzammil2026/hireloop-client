@@ -1,19 +1,21 @@
 'use client'
 import { browseJobs } from '@/lib/actions';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 const BrowseJobs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
-  const [initialJobs, setInitialJobs] = useState();
+  const [initialJobs, setInitialJobs] = useState([]);
+  const [allJobs, setAllJobs]          = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(()=>{
 
     const allJobsPromise = async()=>{
       setLoading(true)
-      const allJobs = await browseJobs();
+      const allJobs = await browseJobs('All');
       setInitialJobs(allJobs)
       setLoading(false)
       
@@ -22,24 +24,24 @@ const BrowseJobs = () => {
   } ,[])
 
   // ইউনিক ক্যাটাগরি বের করার লজিক (ফিল্টারের জন্য)
-  const categories = ['All', ...new Set(initialJobs?.map(job => job.category))];
+  const categories = ['All', ...new Set(initialJobs?.map((job)=> job.category))];
+  
 
   // ফিল্টারিং লজিক
-  const filteredJobs = initialJobs?.filter(job => {
-    const matchesSearch = job?.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          job?.requirements.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === 'All' || job.category === selectedCategory;
-    const matchesType = selectedType === 'All' || job.type === selectedType;
+ useEffect(()=>{
 
-    return matchesSearch && matchesCategory && matchesType;
-  });
+    const allJobsPromise = async()=>{
+      setLoading(true)
+      const Jobs = await browseJobs(searchTerm,selectedCategory,selectedType );
+      setAllJobs(Jobs)
+      setLoading(false)  
+    }
+    allJobsPromise()
+  } ,[searchTerm,selectedCategory,selectedType])
 
   return (
     <>
-    {
-      loading ? <p className='text-center'>loading</p>
-      : 
+   
       <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         
@@ -74,8 +76,8 @@ const BrowseJobs = () => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
               >
-                {categories?.map((cat, idx) => (
-                  <option key={idx} value={cat}>{cat}</option>
+                {categories?.map((cat, ind) => (
+                  <option key={ind} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
@@ -98,9 +100,11 @@ const BrowseJobs = () => {
         </div>
 
         {/* ৩-কলাম জবের গ্রিড লেআউট */}
-        {filteredJobs?.length > 0 ? (
+         {loading && <p className='text-center'>loading</p>}
+      
+        {allJobs?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredJobs?.map((job, index) => (
+            {allJobs?.map((job, index) => (
               <div 
                 key={`${job.title}-${index}`}
                 className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
@@ -149,9 +153,11 @@ const BrowseJobs = () => {
                     <span>⏳ Deadline: {job.deadline}</span>
                     {job.isRemote && <span className="text-green-600 font-semibold">🏠 Work from Home</span>}
                   </div>
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl transition-colors duration-200">
-                    Apply Now
+                  <Link href={`/browse-jobs/${job._id}`}>
+                  <button className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl transition-colors duration-200">
+                    View details
                   </button>
+                  </Link>
                 </div>
 
               </div>
@@ -166,7 +172,7 @@ const BrowseJobs = () => {
 
       </div>
     </div>
-    }
+    
     </>
   );
 };
