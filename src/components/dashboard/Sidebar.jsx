@@ -22,11 +22,7 @@ const menuItems = [
     href: '/dashboard/recruiter/my-company',
     icon: HiOutlineBuildingOffice2,
   },
-   {
-    label: 'Register Company',
-    href: '/dashboard/recruiter/register-company',
-    icon: HiOutlineBuildingOffice2,
-  },
+   
   {
     label: 'Post new job',
     href: '/dashboard/recruiter/jobs/new',
