@@ -1,4 +1,4 @@
-import Sidebar from '@/components/dashboard/Sidebar';
+import Sidebar from '@/components/dashboard/sidebar/Sidebar';
 import React from 'react';
 
 export const metadata = {

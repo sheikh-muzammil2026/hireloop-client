@@ -3,11 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 
 
 export default function SignInPage() {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/';
+
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -32,7 +35,7 @@ export default function SignInPage() {
 
     if(data && !error ){
       toast.success("login successfull.")
-      router.push('/')
+      router.push(redirectTo)
     }
     
    } catch (error) {
@@ -187,7 +190,7 @@ export default function SignInPage() {
     {/* SIGN UP LINK */}
     <p className="text-center text-sm text-gray-400">
       Don&apos;t have an account?{" "}
-      <Link href="/auth/signup" className="text-white hover:underline">
+      <Link href={`/auth/signup?redirect=${redirectTo}`} className="text-white hover:underline">
         Sign Up
       </Link>
     </p>

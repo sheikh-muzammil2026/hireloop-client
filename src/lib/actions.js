@@ -46,13 +46,25 @@ export const getJobsByJobId = async(jobId, tokenData)=>{
     return data;
 }
 
-export const createLogoUploadAction = async(formDaata) =>{
+export const createLogoUploadAction = async(formData) =>{
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/companies`, {
         method: "POST",
         headers: {
             'content-type' : 'application/json',
         },
-        body: JSON.stringify(formDaata)
+        body: JSON.stringify(formData)
+    })
+    const data = await res.json();
+    return data;
+}
+
+export const submitApplication = async(formData)=>{
+   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/applications`, {
+        method: "POST",
+        headers: {
+            'content-type' : 'application/json',
+        },
+        body: JSON.stringify(formData)
     })
     const data = await res.json();
     return data;

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function SignUpPage() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || '/'
   const [isVisible, setIsVisible] = useState(false);
   const [role, setRole] = useState("job_seeker"); // default role
   const [formData, setFormData] = useState({
@@ -36,7 +38,7 @@ export default function SignUpPage() {
     }
     if(data && !error){
          toast.success("Account created successfully 🎉");
-        router.push('/auth/signin')
+        router.push(redirectTo)
 
     }
       
@@ -222,7 +224,7 @@ export default function SignUpPage() {
     {/* SIGN IN */}
     <p className="text-center text-sm text-gray-400">
       Already have an account?{" "}
-      <a href="/auth/signin" className="text-violet-400 hover:underline">
+      <a href={`/auth/signin?redirect=${redirectTo}`} className="text-violet-400 hover:underline">
         Sign In
       </a>
     </p>
