@@ -2,14 +2,14 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { ArrowLeft, Loader2, Send, Crown, User, Mail, Phone, FileText, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
-import { use, useEffect, useState } from "react";
-import { getJobsByJobId, submitApplication } from "@/lib/actions";
+import { ArrowLeft, Loader2, Send, Crown, User, Mail, FileText, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import {  useEffect, useState } from "react";
+import { getJobsByJobId, getPlansByPlanId, submitApplication } from "@/lib/actions";
 
 export default function JobApplyPage() {
   const params = useParams();
   const jobId = params.id;
-  console.log(jobId, "from form page");
+  
   const router = useRouter();
 
   const [job, setJob] = useState(null);
@@ -17,10 +17,38 @@ export default function JobApplyPage() {
 
   // --- HIRELOOP PREMIUM QUOTA STATES ---
   const [quota, setQuota] = useState({ total: 3, remaining: 2 }); // আপনার API ইন্টিগ্রেশন অনুযায়ী ডাইনামিক করবেন
-  const [seekerInfo, setSeekerInfo] = useState({ name: "", email: "", phone: "" });
+  // const [seekerInfo, setSeekerInfo] = useState({ name: "", email: ""});
   const [coverLetter, setCoverLetter] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [plans, setPlans]           = useState([])
+
+  // seeker info niye nibo session theke . form e auto show korbe. button disabled thakbe.
+   const { data: session } = authClient.useSession(); 
+   const user = session?.user;
+   const plan = user?.plan;
+
+
+  useEffect(()=>{
+
+    const fetchPlans = async()=>{
+      try {
+        setLoading(true)
+        const plans = await getPlansByPlanId(plan)
+        setPlans(plans)
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+    fetchPlans()
+    // 1. plan er data niye asbo. 
+    // sei data setplan e set korbo. 
+    // ei plans theke page er uporer dike dekhabo koyta qouta chilo r koyta baki ache . 
+    // plans pete hole plan_id diye nite hbe.
+
+  }, [])
+
+  
 
   useEffect(() => {
     if (!jobId) return;
@@ -49,15 +77,19 @@ export default function JobApplyPage() {
     try {
       setIsSubmitting(true);
       
-      // এখানে ডাটাবেজে সেভ করার জন্য আপনার সার্ভার অ্যাকশনটি কল করবেন
+ //  { id: '1', jobTitle: 'Senior React Developer', company: 'Google', dateApplied: '2 hours ago', status: 'Shortlisted', jobId: '6a22f86' },
+  
       const formData = new FormData();
       formData.append("jobId", jobId);
-      formData.append("name", seekerInfo.name);
-      formData.append("email", seekerInfo.email);
+      formData.append("jobTitle", job?.title);
+      formData.append("companyName", job?.companyName || 'Google');
+      formData.append("status",  'Shortlisted');
+      formData.append("name", user?.name);
+      formData.append("email", user?.email);
       formData.append("coverLetter", coverLetter);
 
-      await submitApplication(formData);
-
+      await submitApplication(Object.fromEntries(formData));
+    
       setSubmitSuccess(true);
     } catch (error) {
       console.error("Submission failed:", error);
@@ -153,10 +185,8 @@ export default function JobApplyPage() {
                   <div className="relative">
                     <input 
                       type="text" 
-                      required
-                      placeholder="e.g. Alamin Hossen"
-                      value={seekerInfo.name}
-                      onChange={(e) => setSeekerInfo({...seekerInfo, name: e.target.value})}
+                      disabled
+                      value={user.name}
                       className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#0b0f19] border border-slate-800 text-xs text-slate-200 placeholder-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all font-medium"
                     />
                     <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
@@ -168,10 +198,8 @@ export default function JobApplyPage() {
                   <div className="relative">
                     <input 
                       type="email" 
-                      required
-                      placeholder="name@hireloop.com"
-                      value={seekerInfo.email}
-                      onChange={(e) => setSeekerInfo({...seekerInfo, email: e.target.value})}
+                      disabled
+                      value={user.email}
                       className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#0b0f19] border border-slate-800 text-xs text-slate-200 placeholder-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all font-medium"
                     />
                     <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
@@ -179,20 +207,6 @@ export default function JobApplyPage() {
                 </div>
               </div>
 
-              {/* <div className="space-y-2">
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Contact Hotline</label>
-                <div className="relative">
-                  <input 
-                    type="tel" 
-                    required
-                    placeholder="+880 1XXXX XXXXXX"
-                    value={seekerInfo.phone}
-                    onChange={(e) => setSeekerInfo({...seekerInfo, phone: e.target.value})}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#0b0f19] border border-slate-800 text-xs text-slate-200 placeholder-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all font-medium"
-                  />
-                  <Phone size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
-                </div>
-              </div> */}
 
               {/* COVER LETTER / MISSION BRIEF */}
               <div className="space-y-2 pt-4">

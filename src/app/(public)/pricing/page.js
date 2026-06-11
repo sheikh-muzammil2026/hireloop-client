@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Briefcase, Check, ChevronDown, HelpCircle, ShieldCheck, Sparkles, User, Zap } from "lucide-react";
 
 export default function PricingPage() {
-  const [billingType, setBillingType] = useState("seeker"); // 'seeker' or 'recruiter'
+  const [billingType, setBillingType] = useState("seeker"); 
   const [openFaq, setOpenFaq] = useState(null);
 
   // --- DATA: JOB SEEKER PLANS ---
@@ -12,6 +12,7 @@ export default function PricingPage() {
     {
       name: "Free",
       price: "$0",
+      plan_id: "seeker_free",
       period: "/forever",
       desc: "Perfect for starting your career journey.",
       features: ["Browse & save up to 10 jobs", "Apply to up to 3 jobs per month", "Basic profile creation", "Standard email alerts"],
@@ -24,6 +25,7 @@ export default function PricingPage() {
     },
     {
       name: "Pro",
+      plan_id: "seeker_pro",
       price: "$19",
       period: "/month",
       desc: "Accelerate your job search with deep insights.",
@@ -37,6 +39,7 @@ export default function PricingPage() {
     },
     {
       name: "Premium",
+      plan_id: "seeker_premium",
       price: "$39",
       period: "/month",
       desc: "Maximum visibility and unlimited power.",
@@ -54,6 +57,7 @@ export default function PricingPage() {
   const recruiterPlans = [
     {
       name: "Free",
+      plan_id: "recruiter_free",
       price: "$0",
       period: "/forever",
       desc: "Great for a company's first year of hiring.",
@@ -67,6 +71,7 @@ export default function PricingPage() {
     },
     {
       name: "Growth",
+      plan_id: "recruiter_growth",
       price: "$49",
       period: "/month",
       desc: "Scale your team with advanced pipeline tooling.",
@@ -80,6 +85,7 @@ export default function PricingPage() {
     },
     {
       name: "Enterprise",
+      plan_id: "recruiter_enterprise",
       price: "$149",
       period: "/month",
       desc: "For large-scale talent acquisition teams.",
@@ -101,7 +107,7 @@ export default function PricingPage() {
     { q: "How does plan switching work?", a: "You can upgrade or downgrade your plan instantly. Upgrades are pro-rated immediately, while downgrades take effect at the start of your next billing interval." },
   ];
 
-  const activePlans = billingType === "jon_seeker" ? seekerPlans : recruiterPlans;
+  const activePlans = billingType === "seeker" ? seekerPlans : recruiterPlans;
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 px-4 sm:px-6 lg:px-8 py-16 selection:bg-indigo-500/30 overflow-hidden relative">
@@ -210,7 +216,7 @@ export default function PricingPage() {
                 </div>
               </div>
 
-
+                          {/* অ্যাকশন বাটন */}
               <form action="/api/checkout_sessions" method="POST">
                 <section>
                   <button type="submit" role="link" className={`w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 cursor-pointer active:scale-[0.98] ${
@@ -218,17 +224,14 @@ export default function PricingPage() {
                   ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20"
                   : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/50"
               }`}>
-                    Checkout
+                    {plan.buttonText}
                   </button>
                 </section>
               </form>
  
 
-              {/* অ্যাকশন বাটন
-              <button >
-                {plan.buttonText}
-              </button> */}
-
+             
+           
             </div>
           );
         })}

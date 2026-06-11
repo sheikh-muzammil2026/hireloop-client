@@ -69,3 +69,24 @@ export const submitApplication = async(formData)=>{
     const data = await res.json();
     return data;
 }
+
+export const getPlansByPlanId = async(planId)=>{
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/plans?${planId}`);
+        const plans = await res.json()
+        return plans;
+    } catch (error) {
+        console.log('fetching plans failed. try again', error.message);
+    }
+
+}
+
+export const getAppliedJobsByEmail = async(userEmail) =>{
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/applications?userEmail=${userEmail}`)
+                const appData = await res.json()
+                return appData;
+            } catch (error) {
+                console.log(error, "Fetching app data failed.");
+            }
+}

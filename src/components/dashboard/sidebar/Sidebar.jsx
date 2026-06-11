@@ -16,7 +16,7 @@ export default function Sidebar() {
   const user = session?.user;
 
   const menuItems = dashboardMenus[user?.role] || [];
-  console.log(menuItems, "from sidbar");
+  // console.log(menuItems, "from sidbar");
 
   const handleLogout = async () => {
     await authClient.signOut();

@@ -18,8 +18,8 @@ export default function SignUpPage() {
   const [loading, setLoading]   = useState(false);
 
  const router = useRouter()
-  const toggleVisibility = () => setIsVisible(!isVisible);
- 
+const toggleVisibility = () => setIsVisible(!isVisible);
+const plan = role === "recruiter" && "recruiter_free";
   const handleSubmit = async(e) => {
     e.preventDefault();
     try {
@@ -29,6 +29,7 @@ export default function SignUpPage() {
         password: formData.password,
         name: formData.name,
         role,
+        plan
         
     })
      

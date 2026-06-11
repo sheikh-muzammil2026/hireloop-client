@@ -21,6 +21,9 @@ export const auth = betterAuth({
         type: "string",
         default: "user",
       },
+      plan: {
+        default: "seeker_free"
+      }
     }
   },
   session: {
