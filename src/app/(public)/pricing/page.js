@@ -217,7 +217,8 @@ export default function PricingPage() {
               </div>
 
                           {/* অ্যাকশন বাটন */}
-              <form action="/api/checkout_sessions" method="POST">
+              <form action="/api/checkout_sessions" method="POST">    
+                  <input type="hidden" name="plan_id" value={plan.plan_id}></input>  
                 <section>
                   <button type="submit" role="link" className={`w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 cursor-pointer active:scale-[0.98] ${
                 plan.popular

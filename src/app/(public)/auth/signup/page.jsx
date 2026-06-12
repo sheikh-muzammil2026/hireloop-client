@@ -19,7 +19,10 @@ export default function SignUpPage() {
 
  const router = useRouter()
 const toggleVisibility = () => setIsVisible(!isVisible);
-const plan = role === "recruiter" && "recruiter_free";
+const plan_Id = role === "admin" 
+  ? null 
+  : (role === "recruiter" ? "recruiter_free" : "seeker_free");
+  
   const handleSubmit = async(e) => {
     e.preventDefault();
     try {
@@ -29,7 +32,7 @@ const plan = role === "recruiter" && "recruiter_free";
         password: formData.password,
         name: formData.name,
         role,
-        plan
+        plan_Id
         
     })
      

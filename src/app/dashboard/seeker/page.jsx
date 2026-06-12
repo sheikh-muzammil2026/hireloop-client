@@ -1,10 +1,22 @@
 'use client'
+import AccessDenied from '@/components/dashboard/routerProtect';
+import { authClient } from '@/lib/auth-client';
 import { Award, Bell, Briefcase, Calendar, ChevronRight, Edit3, Send, User } from 'lucide-react';
 import React from 'react';
 import { Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
 
 export default function SeekerHome() {
+const { 
+        data: session, 
+    } = authClient.useSession() 
+const user = session?.user;
+
+console.log(user);
+
+if (user?.role !== 'job_seeker') {
+  return <AccessDenied requiredRole="seeker" />;
+}
   // মডার্ন চার্ট ডাটা (color এর বদলে সরাসরি fill প্রপার্টি ইউজ করা হয়েছে)
   const chartData = [
     { name: 'Applied', value: 12, fill: '#3b82f6' },       // Blue

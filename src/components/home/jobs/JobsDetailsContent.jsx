@@ -1,47 +1,8 @@
-"use client";
 
-import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-import { getJobsByJobId } from "@/lib/actions";
-import { AlertCircle, ArrowLeft, Award, Briefcase, Building2, Calendar, CheckCircle2, DollarSign, FileText, Loader2, MapPin } from "lucide-react";
-
-export default function JobDetailsContent({ jobId }) {
-  const [job, setJob] = useState();
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!jobId) return;
-
-    const fetchJobData = async () => {
-      const { data: tokenData } = await authClient.token();
-
-      try {
-        setLoading(true);
-        const data = await getJobsByJobId(jobId, tokenData);
-        setJob(data);
-      } catch (error) {
-        console.log("Error fetching job details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJobData();
-  }, [jobId]);
-
-  // --- LOADING STATE DESIGN ---
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-        <span className="text-sm text-slate-400 mt-3 font-medium animate-pulse">
-          Decrypting job specifications...
-        </span>
-      </div>
-    );
-  }
-
+import { AlertCircle, ArrowLeft, Award, Briefcase, Building2, Calendar, CheckCircle2, DollarSign, FileText, Loader2, MapPin, ShieldAlert } from "lucide-react";
+export default async function JobDetailsContent({jobData: job }) {
+ 
   // --- NOT FOUND STATE DESIGN ---
   if (!job) {
     return (
@@ -107,7 +68,7 @@ export default function JobDetailsContent({ jobId }) {
               </h1>
               
               {/* TOP APPLY BUTTON (OPTIONAL - NAVIGATES TO FORM PAGE) */}
-              <Link href={`/jobs/${job._id}/apply`} className="shrink-0">
+              <Link href={`/browse-jobs/${job._id}/apply`} className="shrink-0">
                 <button className="w-full sm:w-auto px-6 py-2.5 cursor-pointer rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 font-bold text-xs uppercase tracking-widest transition-all">
                   Apply Now
                 </button>

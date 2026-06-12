@@ -1,3 +1,4 @@
+
 export const createJob = async(payload, tokenData) =>{
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/jobs`, {
         method: "POST",
@@ -36,7 +37,7 @@ export const getJobsByJobId = async(jobId, tokenData)=>{
    
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/jobs/${jobId}`, {
         headers: {
-            authorization: `bearer ${tokenData?.token}`
+            authorization: `bearer ${tokenData}`
         }
     });
     if (!res.ok) {
@@ -72,7 +73,7 @@ export const submitApplication = async(formData)=>{
 
 export const getPlansByPlanId = async(planId)=>{
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/plans?${planId}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/plans?planId=${planId}`);
         const plans = await res.json()
         return plans;
     } catch (error) {
@@ -89,4 +90,19 @@ export const getAppliedJobsByEmail = async(userEmail) =>{
             } catch (error) {
                 console.log(error, "Fetching app data failed.");
             }
+}
+
+
+export const createSubscription = async(subInfo) =>{
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/subcriptions`, {
+        method: "POST",
+        headers: {
+            'content-type' : 'application/json',
+           
+        },
+        body: JSON.stringify(subInfo)
+    })
+    const data = await res.json();
+    
+    return data;
 }

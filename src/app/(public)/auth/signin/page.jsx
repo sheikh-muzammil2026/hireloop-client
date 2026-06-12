@@ -37,6 +37,10 @@ export default function SignInPage() {
       toast.success("login successfull.")
       router.push(redirectTo)
     }
+
+    if(!data && error){
+      toast.error(error.message)
+    }
     
    } catch (error) {
     console.log(error)

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 
 import { stripe } from '@/lib/stripe';
+import { createSubscription } from '@/lib/actions';
+
 
 export default async function Success({ searchParams }) {
   const { session_id } = await searchParams;
@@ -14,6 +16,7 @@ export default async function Success({ searchParams }) {
   const {
     status,
     customer_details: { email: customerEmail },
+    metadata
   } = await stripe.checkout.sessions.retrieve(session_id, {
     expand: ['line_items', 'payment_intent'],
   });
@@ -22,8 +25,14 @@ export default async function Success({ searchParams }) {
     return redirect('/');
   }
 
-  if (status !== 'complete') {
-    return null;
+  if (status == 'complete') {
+    const subInfo = {
+      email: customerEmail,
+      planId: metadata.planId
+    }
+    await createSubscription(subInfo)
+    
+    
   }
 
   return (

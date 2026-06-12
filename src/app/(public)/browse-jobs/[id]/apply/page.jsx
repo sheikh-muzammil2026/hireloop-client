@@ -1,117 +1,79 @@
-"use client";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-import { ArrowLeft, Loader2, Send, Crown, User, Mail, FileText, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
-import {  useEffect, useState } from "react";
-import { getJobsByJobId, getPlansByPlanId, submitApplication } from "@/lib/actions";
+import { redirect } from "next/navigation"; // ১. রিডাইরেক্ট ইমপোর্ট করা হলো
+import { ArrowLeft, Crown, ShieldAlert, Sparkles } from "lucide-react";
+import { getAppliedJobsByEmail, getJobsByJobId, getPlansByPlanId } from "@/lib/actions";
+import JobApplyForm from "@/components/home/jobs/applyForm";
+import { getUserSession } from "@/lib/core/session";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-export default function JobApplyPage() {
-  const params = useParams();
-  const jobId = params.id;
+export default async function JobApplyPage({ params }) {
   
-  const router = useRouter();
+  const unWraapper = await params;
+  const jobId      = unWraapper.id;
+  // ১. প্রথমে সেশন এবং ইউজার ডেটা ফেচিং
+  const user = await getUserSession(); 
 
-  const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // ২. ইউজার লগইন না থাকলে শুরুতেই সাইন-ইন পেজে রিডাইরেক্ট (সিকিউরড প্রোটেকশন)
+  if (!user) {
+    redirect(`/auth/signin?redirect=/jobs/${jobId}`); // id পরিবর্তন করে jobId করা হলো
+  }
 
-  // --- HIRELOOP PREMIUM QUOTA STATES ---
-  const [quota, setQuota] = useState({ total: 3, remaining: 2 }); // আপনার API ইন্টিগ্রেশন অনুযায়ী ডাইনামিক করবেন
-  // const [seekerInfo, setSeekerInfo] = useState({ name: "", email: ""});
-  const [coverLetter, setCoverLetter] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [plans, setPlans]           = useState([])
-
-  // seeker info niye nibo session theke . form e auto show korbe. button disabled thakbe.
-   const { data: session } = authClient.useSession(); 
-   const user = session?.user;
-   const plan = user?.plan;
-
-
-  useEffect(()=>{
-
-    const fetchPlans = async()=>{
-      try {
-        setLoading(true)
-        const plans = await getPlansByPlanId(plan)
-        setPlans(plans)
-      } catch (error) {
-        console.log(error.message);
-      }
-    }
-    fetchPlans()
-    // 1. plan er data niye asbo. 
-    // sei data setplan e set korbo. 
-    // ei plans theke page er uporer dike dekhabo koyta qouta chilo r koyta baki ache . 
-    // plans pete hole plan_id diye nite hbe.
-
-  }, [])
-
-  
-
-  useEffect(() => {
-    if (!jobId) return;
-
-    const fetchJobData = async () => {
-      try {
-        setLoading(true);
-        const { data: tokenData } = await authClient.token();
-        const data = await getJobsByJobId(jobId, tokenData);
-        setJob(data);
-      } catch (error) {
-        console.error("Error fetching job data for form:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchJobData();
-  }, [jobId]);
-
-  // --- FORM SUBMISSION ---
-  const handleApplySubmit = async (e) => {
-    e.preventDefault();
-    if (!coverLetter.trim()) return;
-
-    try {
-      setIsSubmitting(true);
-      
- //  { id: '1', jobTitle: 'Senior React Developer', company: 'Google', dateApplied: '2 hours ago', status: 'Shortlisted', jobId: '6a22f86' },
-  
-      const formData = new FormData();
-      formData.append("jobId", jobId);
-      formData.append("jobTitle", job?.title);
-      formData.append("companyName", job?.companyName || 'Google');
-      formData.append("status",  'Shortlisted');
-      formData.append("name", user?.name);
-      formData.append("email", user?.email);
-      formData.append("coverLetter", coverLetter);
-
-      await submitApplication(Object.fromEntries(formData));
-    
-      setSubmitSuccess(true);
-    } catch (error) {
-      console.error("Submission failed:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (loading) {
+  // ৩. রোল চেক (ইউজার যদি জব সিকার না হয় তবে এক্সেস ব্লক)
+  if (user.role !== 'job_seeker') {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-        <span className="text-sm text-slate-400 mt-3 font-medium animate-pulse font-mono tracking-widest">
-          INITIALIZING GATEWAY...
-        </span>
+      <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex items-center justify-center p-6 selection:bg-red-500/20">
+        <div className="absolute w-64 h-64 bg-red-500/5 blur-3xl rounded-full pointer-events-none" />
+        <div className="relative max-w-md w-full rounded-2xl border border-red-500/20 bg-[#151c2c]/60 backdrop-blur-xl p-8 text-center shadow-2xl shadow-black/40">
+          <div className="w-14 h-14 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-center justify-center mx-auto text-red-400 mb-5 shadow-lg shadow-red-500/5">
+            <ShieldAlert size={26} />
+          </div>
+          <h2 className="text-xl font-bold text-white tracking-tight">Access Restricted</h2>
+          <p className="text-sm text-slate-400 mt-2.5 leading-relaxed">
+            Only verified <span className="text-red-400 font-semibold">Job Seekers</span> possess the clearance to view details and deploy applications on this position.
+          </p>
+          <div className="mt-6 pt-5 border-t border-slate-800/60">
+            <Link href="/browse-jobs">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-white transition-colors group cursor-pointer">
+                <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" />
+                Return to Job Board
+              </span>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // ৪. ইউজার ভ্যালিড হলে ডেটা এক্সট্র্যাক্ট করা
+  const planId = user?.plan_Id;
+  const userEmail = user?.email;
+
+  let job = null;
+  let plans = null;
+  let applications = [];
+
+  // ৫. ডেটা ফেচিং ব্লক
+  try {
+    const { token } = await auth.api.getToken({
+      headers: await headers() 
+    });
+   
+    // টোকেন সহ ডেটা ফেচ করা হচ্ছে
+    job = await getJobsByJobId(jobId, token);
+    plans = await getPlansByPlanId(planId);
+    applications = await getAppliedJobsByEmail(userEmail);
+  } catch (error) {
+    console.error("Error fetching data on server:", error);
+  }
+console.log(plans ,"fetched plans");
+  const quota = plans?.maxApplicationsPerMonth || 0;
+  const appliedCount = applications?.length || 0;
+  const hasQuota = appliedCount < quota;
+
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 px-4 sm:px-6 lg:px-8 py-12 selection:bg-indigo-500/30 relative overflow-hidden">
-      {/* BACKGROUND GLOW EFFECTS (HIRELOOP STYLE) */}
+      {/* BACKGROUND GLOW EFFECTS */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none" />
 
@@ -120,10 +82,10 @@ export default function JobApplyPage() {
         {/* BACK TO DETAIL PAGE */}
         <div className="mb-8">
           <Link href={`/jobs/${jobId}`}>
-            <button className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-indigo-400 transition-colors group">
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-indigo-400 transition-colors group cursor-pointer">
               <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
               Back to Job Specifications
-            </button>
+            </span>
           </Link>
         </div>
 
@@ -147,107 +109,22 @@ export default function JobApplyPage() {
             <div className="px-4 py-2.5 rounded-xl bg-[#0b0f19] border border-slate-800 flex flex-col items-end shrink-0 shadow-inner">
               <span className="text-[9px] text-slate-500 uppercase tracking-widest font-black">Monthly Allocation</span>
               <span className="text-sm font-black text-indigo-400 font-mono mt-0.5">
-                {quota.remaining} / {quota.total} Quota Left
+                  {appliedCount} / {quota} Quota Left
               </span>
             </div>
           </div>
 
           {/* DYNAMIC RENDERING BLOCK */}
-          {submitSuccess ? (
-            /* SUCCESS SCREEN */
-            <div className="p-10 text-center py-20 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto text-emerald-400 mb-6 shadow-xl shadow-emerald-500/5">
-                <CheckCircle2 size={32} />
-              </div>
-              <h2 className="text-xl font-black text-white tracking-tight">Transmission Successful!</h2>
-              <p className="text-xs text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed">
-                Your credentials and intent profile have been fully committed to our database collection.
-              </p>
-              <button 
-                onClick={() => router.push("/browse-jobs")}
-                className="mt-8 px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/60 text-xs font-bold uppercase tracking-wider transition-all"
-              >
-                Return to Jobboard
-              </button>
-            </div>
-          ) : quota.remaining > 0 ? (
-            /* SHOW APPLICATION FORM */
-            <form onSubmit={handleApplySubmit} className="p-6 sm:p-10 space-y-6">
-              
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-800/40">
-                <User size={14} className="text-indigo-400" /> Personal Identity Records
-              </div>
-
-              {/* SEEKER INFO GRID */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Full Name</label>
-                  <div className="relative">
-                    <input 
-                      type="text" 
-                      disabled
-                      value={user.name}
-                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#0b0f19] border border-slate-800 text-xs text-slate-200 placeholder-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all font-medium"
-                    />
-                    <User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Secure Email</label>
-                  <div className="relative">
-                    <input 
-                      type="email" 
-                      disabled
-                      value={user.email}
-                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#0b0f19] border border-slate-800 text-xs text-slate-200 placeholder-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all font-medium"
-                    />
-                    <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
-                  </div>
-                </div>
-              </div>
-
-
-              {/* COVER LETTER / MISSION BRIEF */}
-              <div className="space-y-2 pt-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-800/40 mb-3">
-                  <FileText size={14} className="text-indigo-400" /> Statement of Capability
-                </div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Cover Letter</label>
-                <textarea
-                  required
-                  rows={6}
-                  value={coverLetter}
-                  onChange={(e) => setCoverLetter(e.target.value)}
-                  placeholder="Elaborate details regarding your technical expertise, system frameworks you mastered, and why HireLoop should pipeline you to this operational unit..."
-                  className="w-full p-4 rounded-xl bg-[#0b0f19] border border-slate-800 text-xs text-slate-200 placeholder-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:outline-none transition-all resize-none leading-relaxed font-medium"
-                />
-              </div>
-
-              {/* ACTION COMPONENT */}
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#090d16]/50 -mx-6 -mb-6 p-6 sm:px-10 border-t border-slate-800/50">
-                <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500">
-                  <ShieldCheck size={12} className="text-emerald-500" /> Verified via HireLoop Core Secure Protocol
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-lg shadow-indigo-600/20 active:scale-95 disabled:opacity-40"
-                >
-                  {isSubmitting ? (
-                    <>Dispatched Engine <Loader2 size={13} className="animate-spin" /></>
-                  ) : (
-                    <>Deploy Application <Send size={12} /></>
-                  )}
-                </button>
-              </div>
-
-            </form>
+          {hasQuota ? (
+            <JobApplyForm
+              jobId={jobId} 
+              job={job} 
+              user={user} 
+            />
           ) : (
             /* PREVENT ACCESS & UPGRADE ALERTS */
-            <div className="p-8 sm:p-14 text-center animate-in fade-in duration-300">
-              <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto text-amber-400 mb-5 shadow-lg shadow-amber-500/5 animate-pulse">
+            <div className="p-8 sm:p-14 text-center">
+              <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto text-amber-400 mb-5 shadow-lg shadow-amber-500/5">
                 <Crown size={26} />
               </div>
               <h2 className="text-lg font-black text-amber-400 uppercase tracking-wider">Quota Limits Exhausted</h2>
@@ -255,10 +132,10 @@ export default function JobApplyPage() {
                 You have spent your maximum allowed monthly submissions. Upgrade to a premium tier to resume network access.
               </p>
               
-              <Link href="/premium-plans" className="inline-block mt-6">
-                <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20 active:scale-95">
+              <Link href="/pricing" className="inline-block mt-6">
+                <span className="px-6 py-3 cursor-pointer inline-block rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20 active:scale-95">
                   Upgrade to Premium
-                </button>
+                </span>
               </Link>
             </div>
           )}
